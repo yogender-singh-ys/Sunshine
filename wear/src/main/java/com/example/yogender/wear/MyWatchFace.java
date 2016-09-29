@@ -24,6 +24,7 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -33,8 +34,14 @@ import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.text.format.Time;
 import android.util.Log;
+import android.view.Display;
+import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowInsets;
+import android.view.WindowManager;
+import android.widget.TextView;
 
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
@@ -93,6 +100,12 @@ public class MyWatchFace extends CanvasWatchFaceService {
         boolean mAmbient;
         Time mTime;
 
+        // variable for XML layout file
+        private int specW, specH;
+        private View myLayout;
+        private TextView day, date, month, hour, minute, second;
+        private final Point displaySize = new Point();
+
         final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -134,6 +147,26 @@ public class MyWatchFace extends CanvasWatchFaceService {
             mTextPaint = createTextPaint(resources.getColor(R.color.digital_text));
 
             mTime = new Time();
+
+            // updates for xml layout file
+            LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            myLayout = inflater.inflate(R.layout.watchface, null);
+
+            Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+            display.getSize(displaySize);
+
+            specW = View.MeasureSpec.makeMeasureSpec(displaySize.x,
+                    View.MeasureSpec.EXACTLY);
+            specH = View.MeasureSpec.makeMeasureSpec(displaySize.y,
+                    View.MeasureSpec.EXACTLY);
+
+            day = (TextView) myLayout.findViewById(R.id.day);
+            date = (TextView) myLayout.findViewById(R.id.date);
+            month = (TextView) myLayout.findViewById(R.id.month);
+            hour = (TextView) myLayout.findViewById(R.id.hour);
+            minute = (TextView) myLayout.findViewById(R.id.minute);
+            second = (TextView) myLayout.findViewById(R.id.second);
+
         }
 
         @Override
@@ -256,7 +289,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
             // Draw the background.
-            if (isInAmbientMode()) {
+            /*if (isInAmbientMode()) {
                 canvas.drawColor(Color.BLACK);
             } else {
                 canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
@@ -274,7 +307,44 @@ public class MyWatchFace extends CanvasWatchFaceService {
             String formatted = format1.format(cal.getTime());
             canvas.drawText(formatted.toUpperCase(),mXOffset,mDateYoffset,mTextPaint);
 
-            canvas.drawLine(0f,90f,50f,90f,mTextPaint);
+            canvas.drawLine(0f,90f,50f,90f,mTextPaint);*/
+
+            // code to add layout
+
+            mTime.setToNow();
+
+            day.setText(String.format("%ta", mTime.toMillis(false)));
+            date.setText(String.format("%02d", mTime.monthDay));
+            month.setText(String.format("%ta", mTime.toMillis(false)));
+
+            hour.setText(String.format("%02d", mTime.hour));
+            minute.setText(String.format("%02d", mTime.minute));
+            if (!mAmbient) {
+                second.setText(String.format("%02d", mTime.second));
+            }
+
+            myLayout.measure(specW, specH);
+            myLayout.layout(0, 0, myLayout.getMeasuredWidth(), myLayout.getMeasuredHeight());
+
+
+            if (mAmbient) {
+                second.setVisibility(View.GONE);
+                myLayout.findViewById(R.id.second_label)
+                        .setVisibility(View.GONE);
+            } else {
+                second.setVisibility(View.VISIBLE);
+                myLayout.findViewById(R.id.second_label)
+                        .setVisibility(View.VISIBLE);
+            }
+
+            Typeface font = Typeface.create("sans-serif-condensed", mAmbient ? Typeface.NORMAL : Typeface.BOLD);
+            ViewGroup group = (ViewGroup) myLayout;
+            for (int i = group.getChildCount() - 1; i >= 0; i--) {
+                ((TextView) group.getChildAt(i)).setTypeface(font);
+            }
+
+            canvas.drawColor(Color.BLACK);
+            myLayout.draw(canvas);
 
 
         }
