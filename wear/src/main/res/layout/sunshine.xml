@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/sunshine_bg_color"
+    android:paddingTop="30dp"
+    >
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true">
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="15:50"
+        android:textColor="@color/digital_text"
+        android:gravity="center"
+        android:layout_gravity="center_horizontal"
+        android:textSize="30dp"
+        android:id="@+id/timeTV"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="FRI, JUL 14 2015"
+        android:textColor="@color/digital_text"
+        android:gravity="center"
+        android:layout_gravity="center_horizontal"
+        android:textSize="14dp"
+        android:id="@+id/dateTV"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/pixel_line"
+        android:gravity="center"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_gravity="center">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_clear"
+            android:layout_marginRight="7dp"
+            android:id="@+id/icon"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="25"
+            android:textColor="@color/white"
+            android:layout_marginRight="7dp"
+            android:textSize="18dp"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="14"
+            android:textColor="@color/white"
+            android:textSize="18dp"
+            />
+
+
+    </LinearLayout>
+
+    </LinearLayout>
+
+
+
+
+</RelativeLayout>

@@ -106,6 +106,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
         private TextView day, date, month, hour, minute, second;
         private final Point displaySize = new Point();
 
+
         final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -335,12 +336,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 second.setVisibility(View.VISIBLE);
                 myLayout.findViewById(R.id.second_label)
                         .setVisibility(View.VISIBLE);
-            }
-
-            Typeface font = Typeface.create("sans-serif-condensed", mAmbient ? Typeface.NORMAL : Typeface.BOLD);
-            ViewGroup group = (ViewGroup) myLayout;
-            for (int i = group.getChildCount() - 1; i >= 0; i--) {
-                ((TextView) group.getChildAt(i)).setTypeface(font);
             }
 
             canvas.drawColor(Color.BLACK);

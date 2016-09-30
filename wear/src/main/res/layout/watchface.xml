@@ -1,9 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:padding="8dp"
+    android:background="@color/sunshine_bg_color"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_centerHorizontal="true"
     >
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_centerHorizontal="true"
+        android:background="#FFCC00"
+        android:layout_gravity="center_horizontal">
+
+
 
     <TextView
         android:layout_width="wrap_content"
@@ -14,7 +27,7 @@
         android:layout_alignParentEnd="true"
         android:textColor="#aaa"
         android:textStyle="bold"
-        android:textSize="20dp"
+        android:textSize="10dp"
         android:textAllCaps="true"
         />
     <TextView
@@ -26,7 +39,7 @@
         android:layout_toStartOf="@+id/month"
         android:textColor="#fff"
         android:textStyle="bold"
-        android:textSize="20dp"
+        android:textSize="10dp"
         />
     <TextView
         android:layout_width="wrap_content"
@@ -37,7 +50,7 @@
         android:layout_toStartOf="@+id/date"
         android:textColor="#aaa"
         android:textStyle="bold"
-        android:textSize="20dp"
+        android:textSize="10dp"
         android:textAllCaps="true"
         />
 
@@ -51,7 +64,7 @@
         android:layout_marginTop="4dp"
         android:textColor="#fff"
         android:textStyle="bold"
-        android:textSize="30dp"
+        android:textSize="15dp"
         />
     <TextView
         android:layout_width="wrap_content"
@@ -62,7 +75,7 @@
         android:layout_toEndOf="@+id/hour"
         android:textColor="#aaa"
         android:textStyle="bold"
-        android:textSize="30dp"
+        android:textSize="15dp"
         android:singleLine="true"
         android:ellipsize="none"
         />
@@ -77,7 +90,7 @@
         android:layout_marginTop="4dp"
         android:textColor="#fff"
         android:textStyle="bold"
-        android:textSize="30dp"
+        android:textSize="15dp"
         />
     <TextView
         android:layout_width="wrap_content"
@@ -88,7 +101,7 @@
         android:layout_toEndOf="@+id/minute"
         android:textColor="#aaa"
         android:textStyle="bold"
-        android:textSize="30dp"
+        android:textSize="15dp"
         android:singleLine="true"
         android:ellipsize="none"
         />
@@ -103,7 +116,7 @@
         android:layout_marginTop="4dp"
         android:textColor="#fff"
         android:textStyle="bold"
-        android:textSize="30dp"
+        android:textSize="15dp"
         />
     <TextView
         android:layout_width="wrap_content"
@@ -114,9 +127,13 @@
         android:layout_toEndOf="@+id/second"
         android:textColor="#aaa"
         android:textStyle="bold"
-        android:textSize="30dp"
+        android:textSize="15dp"
         android:singleLine="true"
         android:ellipsize="none"
         />
-</RelativeLayout>
+
+
+    </LinearLayout>
+
+</LinearLayout>
 
