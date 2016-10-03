@@ -41,6 +41,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.lang.ref.WeakReference;
@@ -103,8 +104,9 @@ public class MyWatchFace extends CanvasWatchFaceService {
         // variable for XML layout file
         private int specW, specH;
         private View myLayout;
-        private TextView day, date, month, hour, minute, second;
+        private TextView day, date, minTemp,maxTemp;
         private final Point displaySize = new Point();
+        private ImageView icon,pixelIcon;
 
 
         final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
@@ -156,17 +158,16 @@ public class MyWatchFace extends CanvasWatchFaceService {
             Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
             display.getSize(displaySize);
 
-            specW = View.MeasureSpec.makeMeasureSpec(displaySize.x,
-                    View.MeasureSpec.EXACTLY);
-            specH = View.MeasureSpec.makeMeasureSpec(displaySize.y,
-                    View.MeasureSpec.EXACTLY);
+            specW = View.MeasureSpec.makeMeasureSpec(displaySize.x, View.MeasureSpec.EXACTLY);
+            specH = View.MeasureSpec.makeMeasureSpec(displaySize.y, View.MeasureSpec.EXACTLY);
 
-            day = (TextView) myLayout.findViewById(R.id.day);
-            date = (TextView) myLayout.findViewById(R.id.date);
-            month = (TextView) myLayout.findViewById(R.id.month);
-            hour = (TextView) myLayout.findViewById(R.id.hour);
-            minute = (TextView) myLayout.findViewById(R.id.minute);
-            second = (TextView) myLayout.findViewById(R.id.second);
+            day = (TextView) myLayout.findViewById(R.id.timeTV);
+            date = (TextView) myLayout.findViewById(R.id.dateTV);
+            minTemp = (TextView) myLayout.findViewById(R.id.min_temp);
+            maxTemp = (TextView) myLayout.findViewById(R.id.max_temp);
+
+            icon = (ImageView) myLayout.findViewById(R.id.icon);
+            pixelIcon = (ImageView) myLayout.findViewById(R.id.pixel_line);
 
         }
 
@@ -289,56 +290,38 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
-            // Draw the background.
-            /*if (isInAmbientMode()) {
-                canvas.drawColor(Color.BLACK);
-            } else {
-                canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
-            }
 
-            // Draw H:MM in ambient mode or H:MM:SS in interactive mode.
             mTime.setToNow();
-            String text = String.format("%d:%02d", mTime.hour, mTime.minute);
-            canvas.drawText(text, mXOffset, mYOffset, mTextPaint);
 
+            String timeStr = String.format("%d:%02d", mTime.hour, mTime.minute);
             Calendar cal = Calendar.getInstance();
             cal.add(Calendar.DATE, 1);
-            SimpleDateFormat format1 = new SimpleDateFormat("EEE, MMM dd yyyy");
+            SimpleDateFormat formatDate = new SimpleDateFormat("EEE, MMM dd yyyy");
 
-            String formatted = format1.format(cal.getTime());
-            canvas.drawText(formatted.toUpperCase(),mXOffset,mDateYoffset,mTextPaint);
+            String formatted = formatDate.format(cal.getTime());
 
-            canvas.drawLine(0f,90f,50f,90f,mTextPaint);*/
-
-            // code to add layout
-
-            mTime.setToNow();
-
-            day.setText(String.format("%ta", mTime.toMillis(false)));
-            date.setText(String.format("%02d", mTime.monthDay));
-            month.setText(String.format("%ta", mTime.toMillis(false)));
-
-            hour.setText(String.format("%02d", mTime.hour));
-            minute.setText(String.format("%02d", mTime.minute));
-            if (!mAmbient) {
-                second.setText(String.format("%02d", mTime.second));
-            }
+            day.setText(timeStr);
+            date.setText(formatted);
 
             myLayout.measure(specW, specH);
             myLayout.layout(0, 0, myLayout.getMeasuredWidth(), myLayout.getMeasuredHeight());
 
 
             if (mAmbient) {
-                second.setVisibility(View.GONE);
-                myLayout.findViewById(R.id.second_label)
-                        .setVisibility(View.GONE);
+                icon.setVisibility(View.GONE);
+                pixelIcon.setVisibility(View.GONE);
+                minTemp.setVisibility(View.GONE);
+                maxTemp.setVisibility(View.GONE);
+                canvas.drawColor(Color.BLACK);
+
             } else {
-                second.setVisibility(View.VISIBLE);
-                myLayout.findViewById(R.id.second_label)
-                        .setVisibility(View.VISIBLE);
+                icon.setVisibility(View.VISIBLE);
+                pixelIcon.setVisibility(View.VISIBLE);
+                minTemp.setVisibility(View.VISIBLE);
+                maxTemp.setVisibility(View.VISIBLE);
+                canvas.drawColor(getResources().getColor(R.color.sunshine_bg_color));
             }
 
-            canvas.drawColor(Color.BLACK);
             myLayout.draw(canvas);
 
 

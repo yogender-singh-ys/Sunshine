@@ -63,10 +63,8 @@ public class TodayWidgetIntentService extends IntentService {
 
         // Get today's data from the ContentProvider
         String location = Utility.getPreferredLocation(this);
-        Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(
-                location, System.currentTimeMillis());
-        Cursor data = getContentResolver().query(weatherForLocationUri, FORECAST_COLUMNS, null,
-                null, WeatherContract.WeatherEntry.COLUMN_DATE + " ASC");
+        Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(location, System.currentTimeMillis());
+        Cursor data = getContentResolver().query(weatherForLocationUri, FORECAST_COLUMNS, null, null, WeatherContract.WeatherEntry.COLUMN_DATE + " ASC");
         if (data == null) {
             return;
         }
