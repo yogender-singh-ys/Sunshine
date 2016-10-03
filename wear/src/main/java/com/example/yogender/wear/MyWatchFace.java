@@ -17,21 +17,28 @@
 package com.example.yogender.wear;
 
 import android.content.BroadcastReceiver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
+import android.support.wearable.provider.WearableCalendarContract;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
+import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.Log;
 import android.view.Display;
@@ -45,7 +52,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
@@ -129,6 +138,24 @@ public class MyWatchFace extends CanvasWatchFaceService {
          */
         boolean mLowBitAmbient;
 
+        private AsyncTask<Void, Void, ArrayList<String>> mWheatherData;
+        static final int MSG_LOAD_DATA = 0;
+        private int wheatherUpdateTimerStatus = 0;
+        private int wheatherUpdateTimer = 2;
+
+        /** Handler to load the meetings once a minute in interactive mode. */
+        final Handler mLoadWheatherDataHandler = new Handler() {
+            @Override
+            public void handleMessage(Message message) {
+                switch (message.what) {
+                    case MSG_LOAD_DATA:
+                        mWheatherData = new LoadWeatherDataTask();
+                        mWheatherData.execute();
+                        break;
+                }
+            }
+        };
+
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
@@ -168,6 +195,9 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
             icon = (ImageView) myLayout.findViewById(R.id.icon);
             pixelIcon = (ImageView) myLayout.findViewById(R.id.pixel_line);
+
+
+            mLoadWheatherDataHandler.sendEmptyMessage(MSG_LOAD_DATA);
 
         }
 
@@ -245,7 +275,15 @@ public class MyWatchFace extends CanvasWatchFaceService {
         @Override
         public void onTimeTick() {
             super.onTimeTick();
+
+            wheatherUpdateTimerStatus++;
+            if(wheatherUpdateTimerStatus == wheatherUpdateTimer){
+                wheatherUpdateTimerStatus = 0;
+                mLoadWheatherDataHandler.sendEmptyMessage(MSG_LOAD_DATA);
+            }
+
             invalidate();
+
         }
 
         @Override
@@ -356,6 +394,53 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 long delayMs = INTERACTIVE_UPDATE_RATE_MS
                         - (timeMs % INTERACTIVE_UPDATE_RATE_MS);
                 mUpdateTimeHandler.sendEmptyMessageDelayed(MSG_UPDATE_TIME, delayMs);
+            }
+        }
+
+        private void updateMaxMinUpdate(String max, String min)
+        {
+            maxTemp.setText(max);
+            minTemp.setText(min);
+            invalidate();
+        }
+
+        public int getRandomNumber(int min, int max) {
+            return (int) Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+
+        private class LoadWeatherDataTask extends AsyncTask<Void, Void, ArrayList<String>> {
+            private PowerManager.WakeLock mWakeLock;
+
+            @Override
+            protected ArrayList<String> doInBackground(Void... voids) {
+                PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+                mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SunshineWatchFaceWakeLock");
+                mWakeLock.acquire();
+
+
+                ArrayList<String> strData = new ArrayList<String>();
+                strData.add(getRandomNumber(0,99)+"");
+                strData.add(getRandomNumber(0,99)+"");
+
+                return strData;
+            }
+
+            @Override
+            protected void onPostExecute(ArrayList<String> result) {
+                updateMaxMinUpdate(result.get(1),result.get(0));
+            }
+
+            @Override
+            protected void onCancelled() {
+                releaseWakeLock();
+            }
+
+            private void releaseWakeLock() {
+                if (mWakeLock != null) {
+                    mWakeLock.release();
+                    mWakeLock = null;
+                }
             }
         }
     }
