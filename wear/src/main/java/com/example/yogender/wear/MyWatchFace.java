@@ -51,6 +51,10 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.Wearable;
+
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
@@ -110,12 +114,15 @@ public class MyWatchFace extends CanvasWatchFaceService {
         boolean mAmbient;
         Time mTime;
 
+        GoogleApiClient mGoogleApiClient;
+
         // variable for XML layout file
         private int specW, specH;
         private View myLayout;
         private TextView day, date, minTemp,maxTemp;
         private final Point displaySize = new Point();
         private ImageView icon,pixelIcon;
+        private Context mContext;
 
 
         final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
@@ -160,6 +167,8 @@ public class MyWatchFace extends CanvasWatchFaceService {
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
 
+            mContext = getBaseContext();
+
             setWatchFaceStyle(new WatchFaceStyle.Builder(MyWatchFace.this)
                     .setCardPeekMode(WatchFaceStyle.PEEK_MODE_VARIABLE)
                     .setBackgroundVisibility(WatchFaceStyle.BACKGROUND_VISIBILITY_INTERRUPTIVE)
@@ -198,6 +207,28 @@ public class MyWatchFace extends CanvasWatchFaceService {
 
 
             mLoadWheatherDataHandler.sendEmptyMessage(MSG_LOAD_DATA);
+
+            mGoogleApiClient = new GoogleApiClient.Builder(mContext)
+                    .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                        @Override
+                        public void onConnected(Bundle connectionHint) {
+                            Log.e("Error", "onConnected: " + connectionHint);
+                            // Now you can use the Data Layer API
+                        }
+                        @Override
+                        public void onConnectionSuspended(int cause) {
+                            Log.e("Error", "onConnectionSuspended: " + cause);
+                        }
+                    })
+                    .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+                        @Override
+                        public void onConnectionFailed(ConnectionResult result) {
+                            Log.e("Error", "onConnectionFailed: " + result);
+                        }
+                    })
+                    // Request access only to the Wearable API
+                    .addApi(Wearable.API)
+                    .build();
 
         }
 
