@@ -74,4 +74,7 @@
          on devices that don't yet have Roboto -->
     <dimen name="forecast_widget_text_width">38dp</dimen>
 
+    <!-- dimension for watches -->
+    <dimen name="weather_icon_wearable">40dp</dimen>
+
 </resources>
