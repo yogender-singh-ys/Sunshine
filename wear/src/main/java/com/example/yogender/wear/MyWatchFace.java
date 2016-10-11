@@ -17,52 +17,36 @@
 package com.example.yogender.wear;
 
 import android.content.BroadcastReceiver;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
-import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.PowerManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.wearable.provider.WearableCalendarContract;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
-import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.wearable.DataApi;
-import com.google.android.gms.wearable.DataEventBuffer;
-import com.google.android.gms.wearable.Wearable;
-
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
@@ -110,7 +94,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
         }
     }
 
-    private class Engine extends CanvasWatchFaceService.Engine implements DataApi.DataListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+    private class Engine extends CanvasWatchFaceService.Engine  {
         final Handler mUpdateTimeHandler = new EngineHandler(this);
         boolean mRegisteredTimeZoneReceiver = false;
         Paint mBackgroundPaint;
@@ -128,12 +112,43 @@ public class MyWatchFace extends CanvasWatchFaceService {
         private final Point displaySize = new Point();
         private ImageView icon,pixelIcon;
 
+        String mWeatherString;
+        String high = "20";
+        String low = "10";
+        Bitmap weatherIcon;
+
+        private static final String DESC = "com.example.android.sunshine.app.desc";
+        private static final String HIGH = "com.example.android.sunshine.app.high";
+        private static final String LOW = "com.example.android.sunshine.app.low";
+        private static final String ICON = "com.example.android.sunshine.app.icon";
+
 
         final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 mTime.clear(intent.getStringExtra("time-zone"));
                 mTime.setToNow();
+            }
+        };
+
+        final BroadcastReceiver mWeatherUpdateReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.e(LogTag, "Got broadcast event:  " + intent.getAction());
+                if (intent.hasExtra(ICON)) {
+                    weatherIcon = intent.getParcelableExtra(ICON);
+                }
+                if (intent.hasExtra(HIGH)) {
+                    high = intent.getStringExtra(HIGH);
+                }
+                if (intent.hasExtra(LOW)) {
+                    low = intent.getStringExtra(LOW);
+                }
+                if (intent.hasExtra(DESC)) {
+                    mWeatherString = intent.getStringExtra(DESC);
+                }
+                Log.d(LogTag, "Updated from weather data!");
+                invalidate();
             }
         };
 
@@ -149,29 +164,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
          */
         boolean mLowBitAmbient;
 
-        private AsyncTask<Void, Void, ArrayList<String>> mWheatherData;
-        static final int MSG_LOAD_DATA = 0;
-        private int wheatherUpdateTimerStatus = 0;
-        private int wheatherUpdateTimer = 2;
-
-        /** Handler to load the meetings once a minute in interactive mode. */
-        final Handler mLoadWheatherDataHandler = new Handler() {
-            @Override
-            public void handleMessage(Message message) {
-                switch (message.what) {
-                    case MSG_LOAD_DATA:
-                        mWheatherData = new LoadWeatherDataTask();
-                        mWheatherData.execute();
-                        break;
-                }
-            }
-        };
-
-        GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(MyWatchFace.this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(Wearable.API)
-                .build();
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -184,7 +176,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
                     .setAcceptsTapEvents(true)
                     .build());
             Resources resources = MyWatchFace.this.getResources();
-            mYOffset = resources.getDimension(R.dimen.digital_y_offset);
+            mYOffset = resources.getDimension(R.dimen.time_y_offset);
             mDateYoffset = resources.getDimension(R.dimen.date_y_offset);
 
             mBackgroundPaint = new Paint();
@@ -213,8 +205,8 @@ public class MyWatchFace extends CanvasWatchFaceService {
             icon = (ImageView) myLayout.findViewById(R.id.icon);
             pixelIcon = (ImageView) myLayout.findViewById(R.id.pixel_line);
 
-
-            mLoadWheatherDataHandler.sendEmptyMessage(MSG_LOAD_DATA);
+            IntentFilter mFilter = new IntentFilter(SunshineWearableListenerService.UPDATE_ACTION);
+            LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mWeatherUpdateReceiver, mFilter);
 
         }
 
@@ -276,9 +268,9 @@ public class MyWatchFace extends CanvasWatchFaceService {
             Resources resources = MyWatchFace.this.getResources();
             boolean isRound = insets.isRound();
             mXOffset = resources.getDimension(isRound
-                    ? R.dimen.digital_x_offset_round : R.dimen.digital_x_offset);
+                    ? R.dimen.time_y_offset : R.dimen.time_y_offset);
             float textSize = resources.getDimension(isRound
-                    ? R.dimen.digital_text_size_round : R.dimen.digital_text_size);
+                    ? R.dimen.time_y_offset : R.dimen.time_y_offset);
 
             mTextPaint.setTextSize(textSize);
         }
@@ -292,12 +284,6 @@ public class MyWatchFace extends CanvasWatchFaceService {
         @Override
         public void onTimeTick() {
             super.onTimeTick();
-
-            wheatherUpdateTimerStatus++;
-            if(wheatherUpdateTimerStatus == wheatherUpdateTimer){
-                wheatherUpdateTimerStatus = 0;
-                mLoadWheatherDataHandler.sendEmptyMessage(MSG_LOAD_DATA);
-            }
 
             invalidate();
 
@@ -361,6 +347,8 @@ public class MyWatchFace extends CanvasWatchFaceService {
             myLayout.measure(specW, specH);
             myLayout.layout(0, 0, myLayout.getMeasuredWidth(), myLayout.getMeasuredHeight());
 
+            minTemp.setText(low);
+            maxTemp.setText(high);
 
             if (mAmbient) {
                 icon.setVisibility(View.GONE);
@@ -370,12 +358,18 @@ public class MyWatchFace extends CanvasWatchFaceService {
                 canvas.drawColor(Color.BLACK);
 
             } else {
+                if( weatherIcon != null) {
+                    icon.setImageBitmap(weatherIcon);
+                }
+
                 icon.setVisibility(View.VISIBLE);
                 pixelIcon.setVisibility(View.VISIBLE);
                 minTemp.setVisibility(View.VISIBLE);
                 maxTemp.setVisibility(View.VISIBLE);
                 canvas.drawColor(getResources().getColor(R.color.sunshine_bg_color));
             }
+
+
 
             myLayout.draw(canvas);
 
@@ -421,66 +415,5 @@ public class MyWatchFace extends CanvasWatchFaceService {
             invalidate();
         }
 
-        public int getRandomNumber(int min, int max) {
-            return (int) Math.floor(Math.random() * (max - min + 1)) + min;
-        }
-
-
-        private class LoadWeatherDataTask extends AsyncTask<Void, Void, ArrayList<String>> {
-            private PowerManager.WakeLock mWakeLock;
-
-            @Override
-            protected ArrayList<String> doInBackground(Void... voids) {
-                PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-                mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SunshineWatchFaceWakeLock");
-                mWakeLock.acquire();
-
-
-                ArrayList<String> strData = new ArrayList<String>();
-                strData.add(getRandomNumber(0,99)+"");
-                strData.add(getRandomNumber(0,99)+"");
-
-                return strData;
-            }
-
-            @Override
-            protected void onPostExecute(ArrayList<String> result) {
-                updateMaxMinUpdate(result.get(1),result.get(0));
-            }
-
-            @Override
-            protected void onCancelled() {
-                releaseWakeLock();
-            }
-
-            private void releaseWakeLock() {
-                if (mWakeLock != null) {
-                    mWakeLock.release();
-                    mWakeLock = null;
-                }
-            }
-        }
-
-
-
-        @Override
-        public void onConnected(@Nullable Bundle bundle) {
-
-        }
-
-        @Override
-        public void onConnectionSuspended(int i) {
-
-        }
-
-        @Override
-        public void onDataChanged(DataEventBuffer dataEventBuffer) {
-
-        }
-
-        @Override
-        public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-        }
     }
 }

@@ -1,9 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="digital_text_size">20dp</dimen>
-    <dimen name="digital_text_size_round">20dp</dimen>
-    <dimen name="digital_x_offset">15dp</dimen>
-    <dimen name="digital_x_offset_round">25dp</dimen>
-    <dimen name="digital_y_offset">20dp</dimen>
-    <dimen name="date_y_offset">50dp</dimen>
+    <dimen name="time_text_size_square">40dp</dimen>
+    <dimen name="time_text_size_round">45dp</dimen>
+    <dimen name="date_text_size_round">20dp</dimen>
+    <dimen name="date_text_size_square">16dp</dimen>
+    <dimen name="temperature_text_size_round">30dp</dimen>
+    <dimen name="temperature_text_size_square">26dp</dimen>
+    <!-- x offsets -->
+    <dimen name="time_x_offset_square">65dp</dimen>
+    <dimen name="time_x_offset_round">65dp</dimen>
+    <dimen name="date_x_offset_square">45dp</dimen>
+    <dimen name="date_x_offset_round">45dp</dimen>
+    <dimen name="weather_icon_x_offset_square">60dp</dimen>
+    <dimen name="weather_icon_x_offset_round">60dp</dimen>
+    <dimen name="high_x_offset_square">100dp</dimen>
+    <dimen name="high_x_offset_round">100dp</dimen>
+    <dimen name="low_x_offset_square">150dp</dimen>
+    <dimen name="low_x_offset_round">150dp</dimen>
+
+    <!-- y offsets -->
+    <dimen name="time_y_offset">90dp</dimen>
+    <dimen name="weather_y_offset">190dp</dimen>
+    <dimen name="weather_icon_y_offset">200dp</dimen>
+    <dimen name="date_y_offset">120dp</dimen>
+    <dimen name="line_y_offset">140dp</dimen>
+    <dimen name="time_line_height">50dp</dimen>
+    <dimen name="date_line_height">20dp</dimen>
 </resources>
